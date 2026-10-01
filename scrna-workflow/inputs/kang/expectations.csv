@@ -1,0 +1,9 @@
+expectation,kind,column,group,genes,against,direction,low,high,set
+B cells express B-cell genes,gene_up,cell_type,B cell,MS4A1;CD79A;CD79B,,,,,
+CD14 monocytes express monocyte genes,gene_up,cell_type,CD14 monocyte,LYZ;S100A8;S100A9;CD14,,,,,
+NK cells express cytotoxic genes,gene_up,cell_type,NK cell,GNLY;NKG7;KLRD1,,,,,
+Interferon-stimulated genes rise after treatment,gene_up,condition,stim,ISG15;IFIT1;IFIT3;MX1;OAS1;IFI6;IFITM3;ISG20;IRF7,ctrl,,,,
+Negative control: T-cell receptor genes are not higher in B cells,gene_up,cell_type,B cell,CD3D;CD3E,,down,,,
+Negative control: platelet genes are not higher in T cells,gene_up,cell_type,CD4 T cell,PPBP;PF4,,down,,,
+CD4 T cells are 25 to 55% of PBMC,fraction_range,cell_type,CD4 T cell,,,,0.25,0.55,
+RIG-I-like receptor pathway score rises after treatment,set_up,condition,stim,,ctrl,,,,RIG-I-like receptor signaling pathway [hsa04622]

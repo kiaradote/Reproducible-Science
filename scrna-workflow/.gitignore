@@ -1,0 +1,6 @@
+runs/
+testdata/
+__pycache__/
+.ipynb_checkpoints/
+handoff/
+*.h5ad

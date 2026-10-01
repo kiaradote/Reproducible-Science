@@ -1,0 +1,9 @@
+cell_type,positive,negative,source
+CD4 T cell,IL7R;CD3D;CD3E;LTB;IL32;CNOT6L;MTCO2P22,,"CellGuide canonical + computational markers (shared genes dropped), plus curated PBMC markers added by the analyst"
+CD8 T cell,CD8A;CD8B;CD3D;CCL5;DUSP2;GZMH;GZMK;IL32;KLRG1;TRGC2,,"CellGuide canonical + computational markers (shared genes dropped), plus curated PBMC markers added by the analyst"
+NK cell,GNLY;NKG7;KLRD1;PRF1;KLRC1;GZMA;RUNX3;EOMES;TBX21,,"CellGuide canonical + computational markers (shared genes dropped), plus curated PBMC markers added by the analyst"
+B cell,MS4A1;CD79A;CD79B;BANK1;CD19;JCHAIN;CD22;RIPOR2;AFF3,,"CellGuide canonical + computational markers (shared genes dropped), plus curated PBMC markers added by the analyst"
+CD14 monocyte,CD14;LYZ;S100A8;S100A9;CCR2;CLEC7A;FCER1G;FCN1;VCAN;IFI30,,"CellGuide canonical + computational markers (shared genes dropped), plus curated PBMC markers added by the analyst"
+CD16 monocyte,FCGR3A;MS4A7;LST1;AIF1;ITGAL;LILRB2;CLEC7A;CSF1R;FCER1G;RGS18,,"CellGuide canonical + computational markers (shared genes dropped), plus curated PBMC markers added by the analyst"
+dendritic cell,FCER1A;CLEC10A;CD1C;CST3;LYZ;CD40;CD83;ITGAX;MTATP6P1,,"CellGuide canonical + computational markers (shared genes dropped), plus curated PBMC markers added by the analyst"
+megakaryocyte,PPBP;PF4;GP9;ITGA2B;CAVIN2;CLEC1B;FCER1A;GATA2;LAT;PDLIM1,,"CellGuide canonical + computational markers (shared genes dropped), plus curated PBMC markers added by the analyst"

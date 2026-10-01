@@ -1,0 +1,6 @@
+expectation,kind,column,group,genes,direction,low,high
+Beta cells express insulin and islet genes,gene_up,cell_type,pancreatic beta cell,INS;IAPP;MAFA;PDX1,,,
+Alpha cells express glucagon,gene_up,cell_type,pancreatic alpha cell,GCG;ARX;IRX2,,,
+Ductal cells express ductal genes,gene_up,cell_type,pancreatic ductal cell,CFTR;KRT19;ANXA4,,,
+Negative control: glucagon is not higher in endothelial cells,gene_up,cell_type,endothelial cell,GCG,down,,
+Beta cells are 30 to 60% of islet donor cells,fraction_range,cell_type,pancreatic beta cell,,,0.3,0.6
