@@ -110,3 +110,46 @@ def kang_mtx(paths, p):
     ids = list(adata.obs_names)
     return adata, {"matrix_ids": ids, "matrix_labels": adata.obs["library"].to_numpy(), "meta_ids": ids,
                    "meta_labels": pd.Series(meta.loc[ids, "stim"].to_numpy(), index=ids), "note": note}
+
+
+def paul15_umitab(paths, p):
+    """GSE72857 (Paul 2015, mouse bone marrow, MARS-seq UMI counts): genes x wells text matrix whose header holds the well IDs and has no
+    blank gene field, plus an experimental-design table (comment lines, then a header starting with Well_ID).
+    The matrix has no label row, so column order is tested on content: wells flagged as empty (Number_of_cells == 0) must have
+    far lower UMI totals than the other wells, which fails for a header shifted by even one position.
+    Gene names are 'symbol;older-alias;...': the first symbol is kept as the gene name and the full string in var['gene_label'].
+    p['keep_batches'] (optional) restricts to some Batch_desc values (here the wild-type experiments); wells flagged empty are always dropped."""
+    X, ids, genes, labels, layout = read_genes_by_cells_text(paths["matrix"], chunk_rows=p.get("chunk_rows", 2000))
+    ids = [s.strip('"') for s in ids]
+    with open_text(paths["meta"]) as f:
+        head = list(islice(f, 200))
+    skip = next(i for i, line in enumerate(head) if line.startswith("Well_ID\tSeq_batch_ID"))
+    design = pd.read_csv(paths["meta"], sep="\t", skiprows=skip, dtype=str).set_index("Well_ID")
+    if design.index.duplicated().any():
+        raise ValueError("duplicated Well_ID in the design table")
+    obs = design.reindex(ids)
+    if obs["Batch_desc"].isna().any():
+        raise ValueError(f"{int(obs['Batch_desc'].isna().sum())} matrix wells are missing from the design table")
+    n_cells = obs["Number_of_cells"].astype(int).to_numpy()
+    total = np.asarray(X.sum(axis=1)).ravel()
+    empty = n_cells == 0
+    med_empty, med_other = float(np.median(total[empty])), float(np.median(total[~empty]))
+    if empty.sum() >= 20 and med_empty >= 0.1 * med_other:
+        raise ValueError(f"wells flagged empty have median {med_empty:.0f} UMI against {med_other:.0f} for the others: header probably shifted")
+    keep = ~empty
+    if p.get("keep_batches"):
+        keep &= obs["Batch_desc"].isin(p["keep_batches"]).to_numpy()
+    idx = np.where(keep)[0]
+    sub = obs.iloc[idx]
+    o = pd.DataFrame({"sort_scheme": sub["Batch_desc"].to_numpy(), "mouse": ("mouse" + sub["Mouse_ID"]).to_numpy(),
+                      "amp_batch": sub["Amp_batch_ID"].to_numpy(), "seq_batch": sub["Seq_batch_ID"].to_numpy(),
+                      "plate": ("plate" + sub["Plate_ID"]).to_numpy()}, index=sub.index.to_numpy())
+    var = pd.DataFrame({"gene_label": genes}, index=[g.split(";")[0] for g in genes])
+    adata = ad.AnnData(X=X[idx], obs=o, var=var)
+    adata.var_names_make_unique()
+    adata.uns["loader_layout"] = layout
+    note = (f"{len(ids)} wells in the matrix, {len(design)} rows in the design table; {int(empty.sum())} wells flagged empty "
+            f"(median {med_empty:.0f} UMI against {med_other:.0f} for the others, so column order is consistent with the design table) were dropped")
+    if p.get("keep_batches"):
+        note += f"; kept {len(idx)} wells from {len(p['keep_batches'])} wild-type experiments ({', '.join(p['keep_batches'])})"
+    return adata, {"matrix_ids": ids, "meta_ids": list(design.index), "matrix_labels": None, "meta_labels": None, "note": note}

@@ -1,0 +1,7 @@
+expectation,kind,column,group,genes,against,direction,low,high,set
+Erythroid cells express haemoglobin and erythroid transcription factors,gene_up,cell_type,erythroid cell,Hbb-b1;Gata1;Klf1,,,,,
+Neutrophils express S100 and granule genes,gene_up,cell_type,neutrophil,S100a8;S100a9;Camp;Ngp,,,,,
+Monocytes express Csf1r and Irf8,gene_up,cell_type,monocyte,Csf1r;Irf8;Ly6c2,,,,,
+Megakaryocyte progenitors express platelet genes,gene_up,cell_type,megakaryocyte progenitor,Pf4;Itga2b;Gp9,,,,,
+Negative control: haemoglobin genes are not higher in neutrophils,gene_up,cell_type,neutrophil,Hbb-b1;Gypa,,down,,,
+Negative control: platelet genes are not higher in monocytes,gene_up,cell_type,monocyte,Pf4;Gp9,,down,,,

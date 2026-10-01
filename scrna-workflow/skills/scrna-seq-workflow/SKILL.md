@@ -27,13 +27,15 @@ Checkpoint 7 is skipped, and recorded as skipped, when there is no condition to 
 1. **Order.** Run the checkpoints in the order above. If the reusable notebook (`scrna_checkpoints.ipynb` with the `scrna_workflow/` folder) is available, run it: it already executes the stages in this order, skips stages whose parameters and inputs have not changed, and writes the files below. Otherwise follow the skills in order and produce the same files by hand.
 2. **One restartable file per checkpoint.** After each checkpoint save its result (`runs/<dataset>/checkpoints/NN_<stage>.h5ad`, `.json` for fetch), its report (`reports/<stage>.md` and `.json`) and its figures (`figures/<stage>/`, with `figure_captions.json` of one-line captions and `figure_legends.md` of plain-language legends). A later stage reads only the previous stage's file, so any stage can be restarted by invalidating it and rerunning.
 3. **Stop on FAIL.** A FAIL stops the run. Show the reason and ask the user to fix the cause or to continue on purpose; continuing is recorded with a written reason (`accept`). A WARN never stops the run but is carried forward as a caveat. Never lower a threshold to turn a FAIL into a PASS.
-4. **Report every checkpoint as a card** the moment it finishes, in this order and in plain language (a student must be able to read it without opening code):
-   - **Verdict and quality rating** (see the scale below), with the reason in one sentence.
-   - **Tests run:** a table of status, test, what it tests (one phrase), and the result with its numbers.
-   - **Conclusion:** one or two sentences saying what the checkpoint found and what it means for the next step.
-   - **Not run:** the checks that did not run and why. A check that did not run counts for nothing.
-   - **Caveats carried forward** from earlier checkpoints that still apply.
-   - **How to go back:** the checkpoint file and the command that reruns from this stage.
+4. **Report every checkpoint in plain English, in the chat, the moment it finishes.** Do not wait until the end and do not just point to a file. No code and no function names; a student should be able to read it cold. Write, for each checkpoint:
+   - **Heading:** checkpoint number and name, verdict (PASS, WARN or FAIL) and quality rating.
+   - **What this checkpoint asks:** one sentence.
+   - **Tests** as a short table with one row per test and three plain columns: *What it checked* (a definition in everyday words, for example "whether any cell ID appears twice"), *What we found* (the numbers), and *Result and why* (PASS, WARN, FAIL or INFO plus the reason in words: the rule or threshold and how the data compared with it, for example "WARN: 45.7% of the chosen genes are rarely detected; we expect under 10%"). A result is never given without its reason. An INFO row says why it is not scored.
+   - **Conclusion:** one to three sentences on what this means for how far the result can be trusted and what happens next, naming the biggest caveat.
+   - **Did not run:** the checks that did not run, each with the reason.
+   - **Carried caveats** from earlier checkpoints that still apply.
+   - **Go back:** the checkpoint file and the command that reruns from here.
+   If a test's result already states its threshold, quote it; otherwise state the default from the checkpoint's own skill. In the chat show every WARN and FAIL and at least the five most informative PASS rows, and say how many other tests passed; the full list stays in the report file.
 5. **Quality scale** (shown for every checkpoint and for the whole run, in the quality check table at the top of `RUN_SUMMARY.md`):
    - *Good*: every scored check met its threshold.
    - *Usable, with N caveats*: at least one check warned; every result built on this checkpoint inherits the caveat.
@@ -46,6 +48,23 @@ Checkpoint 7 is skipped, and recorded as skipped, when there is no condition to 
 8. **Defaults and questions.** Choose universal defaults and say what was chosen. Ask the user only for what they alone know: the species, which obs column is the condition and which is the sample (donor, patient), the expected biology for the expectations file, and whether a large run should proceed when memory or time is limited. Never use the dataset's own authors' labels as the marker panel or reference for that dataset; use them only to evaluate.
 9. **Large data.** Load matrices sparse and in chunks, record peak memory per stage, work on a capped subsample for sensitivity runs and say so, and pause a heavy run when the user's compute is limited instead of shrinking the analysis silently.
 10. **Honest wording.** A cluster name means "matches this marker panel", not "proven cell type". Pathway names describe shared genes, not activity. A difference between conditions is a treatment effect only if the design check says the condition is not confounded with a batch. State any subsampling, skipped sample or unrun check next to the number it affects.
+
+## Example checkpoint card
+
+```
+Checkpoint 2: QC and filtering. WARN, usable with 2 caveats
+Asks: which cells are damaged, empty or doubled, and are the filters sensible?
+
+| What it checked | What we found | Result and why |
+|---|---|---|
+| Whether cells have enough detected genes to be real cells | 1,937 cells kept of 1,990; 53 had under 200 genes | PASS: under 5% of cells were removed |
+| Whether mitochondrial genes (a sign of dying cells) are present | 13 mitochondrial genes listed, but 0.00% of cells have any counts | WARN: the 20% filter removes nothing, so stressed cells cannot be found this way |
+| Whether look-alike nuclear genes were wrongly counted as mitochondrial | 14 MTRNR2L genes found and excluded | INFO: not scored, recorded so the filter is reproducible |
+
+Conclusion: cells are usable, but dying cells could not be screened for; later steps inherit this caveat.
+Did not run: doublet detection (not applicable to this data type).
+Go back: runs/<dataset>/checkpoints/02_qc.h5ad; wf.invalidate("qc") then rerun.
+```
 
 ## Finished summary template
 
