@@ -24,17 +24,18 @@ Rules: (1) plot only what the analysis actually supports; carry its WARNs into t
 ## Steps
 1. **Inspect** the saved results file (units, ranges, missingness, sample composition, what one n is). Never plot from in-memory variables (P1, P2).
 2. **Write the spec** with `figure_spec_template()`: one question, chart type and why (C1), n and denominators (E1), error-bar meaning (E3), reference/control (E6), baseline and range reasons (H3), missing-data handling (H8), color plan (K1-K7), purpose (exploration or explanation). Save it as `figN.spec.md`. If the question is unclear, ask the user; do not guess.
-3. **Choose the chart from the question** using rubric C1. No 3D, no explode/shadow pies (H1, H2).
+3. **Choose the style from the question and the variable types.** Write in the spec the question, the variable types, the style chosen and the best alternative you considered and why you rejected it (C1, C6). No 3D, no explode/shadow pies (H1, H2). For complicated data keep a clear overview (heatmap, small multiples, overview plus detail) without deleting evidence.
 4. **Decide scale deliberately.**
    - Bars start at zero. Points/lines may use a focused range, with a stated reason (H3).
    - Linear vs log: if the question is not clear, make BOTH, show the user, and record which was chosen for later figures (H6).
    - Binned data: try several bin widths and keep the one that preserves the structure (C3).
    - Panels to be compared share axes (H9).
 5. **Build** with `apply_figure_rules()`, `categorical_colors`, `colormap_for`, `bubble_area`, `break_at_gaps`. Show raw points when n is small (E4); define error bars and n (E1, E3); add control/reference and a specific annotation (E6, E8). More than about 6 series -> split or bin (S1).
+5b. **Unbiased-presentation check (U1-U5).** Same filters, scales, bins and ordering for every group; exclusions stated with counts; a descriptive, neutral title; uncertainty and contrary or null results shown; limits and analysis warnings in the caption.
 6. **Self-check:** `audit_figure(fig)` before saving, `lint_script(script)` after. Fix every FAIL. Fix or justify every WARN in the spec.
 7. **Save** `figN.py`, `figN.svg` (or pdf), `figN.png`, `figN.spec.md` via the artifact tool.
 8. **Automatic review (mandatory).** As soon as the figure is saved, delegate it to the `FIGURE_REVIEWER` agent from the `repl` tool with `host.delegate({"name": "Review", "profile": "FIGURE_REVIEWER", "task": ...})`. The task must contain the image, script and spec as literal artifact markers plus a data summary (n, ranges, filters). The reviewer runs `lint_script` itself and returns a card. Revise on every FAIL and fix or justify every WARN, re-save, and review again. Stop when there is no FAIL, or after 3 rounds and report what remains. The maker never grades its own figure.
 9. **Report** in the week-1 style: what each rule checked, what was found, PASS/WARN/FAIL with reason, a rating, what was not checked, and the final `figN.review.md`.
 
 ## Rules the generator must never break
-No 3D. Bars from zero. No rainbow or neon colors. Size by area. No line across a gap or between unordered points. No means without n and defined error bars. No claim stronger than the design supports.
+The chart style must fit the question and variable types, and the presentation must be neutral: nothing hidden, nothing favored, uncertainty shown. No 3D. Bars from zero. No rainbow or neon colors. Size by area. No line across a gap or between unordered points. No means without n and defined error bars. No claim stronger than the design supports.

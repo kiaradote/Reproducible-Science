@@ -1,6 +1,6 @@
 ---
 name: figure-rubric
-description: "Shared, numbered rubric of figure rules from the Lecture 2 data-visualization class (readability, not skewing results, readable color, chart choice, context, simplicity, process), each with its source slide, PASS/WARN/FAIL severity and how it is checked. Load when generating a figure (via figure-generation) or reviewing one (figure-review agent). Ships helpers: lint_script, audit_figure, review_card, apply_figure_rules, categorical_colors, colormap_for, symmetric_limits, bubble_area, break_at_gaps, figure_spec_template."
+description: "Shared, numbered rubric of figure rules from the rules, good and bad examples and guidelines supplied by the user (readability, not skewing results, readable color, appropriate chart style, unbiased presentation, context, simplicity, process), each with its source slide, PASS/WARN/FAIL severity and how it is checked. Load when generating a figure (via figure-generation) or reviewing one (figure-review agent). Ships helpers: lint_script, audit_figure, review_card, apply_figure_rules, categorical_colors, colormap_for, symmetric_limits, bubble_area, break_at_gaps, figure_spec_template."
 ---
 
 # Figure rubric (single source of truth)
@@ -44,6 +44,7 @@ Both the generator and the reviewer read this file, so they cannot drift apart. 
 | C3 | Binning is acceptable but must reveal the true dynamics: try several bin widths and keep the one that survives; use common bins when comparing groups. | 30,49 | NOTES | WARN | IMG |
 | C4 | Overplotting: use transparency or binned counts with a density scale (grays or blues); state the scale. | 37 | NOTES | WARN | IMG |
 | C5 | Scale axes so clusters and structure are visible (not squashed into a corner). | 34 | NOTES | WARN | IMG |
+| C6 | Style fit for complicated data: the spec names the question and variable types, and the chosen style must be the one that answers it. The reviewer names the style used and a better alternative if one exists. For many variables or groups, keep an overview that is clear (heatmap, small multiples, layered overview plus detail) and never delete evidence to simplify. FAIL if the style cannot show the answer. | 11,24,26,53,56 | ADDED (extends C1, S1) | FAIL | SPEC, IMG |
 
 ## D. Color
 | ID | Rule | Slide | Origin | Sev | Check |
@@ -70,6 +71,15 @@ Both the generator and the reviewer read this file, so they cannot drift apart. 
 | P2 | Figure reads saved results, not in-memory variables; saved as vector (svg/pdf) plus png with the script. | - | ADDED (week-1 convention) | WARN | CODE |
 | P3 | Fixed random seeds; data path recorded in the spec. | - | ADDED | WARN | CODE |
 
+## G. Unbiased, clear presentation
+| ID | Rule | Slide | Origin | Sev | Check |
+|---|---|---|---|---|---|
+| U1 | Show all relevant data. No silent exclusions, outlier removal or subsets; state how many were excluded and why; apply the same filters to every group. | 44,55 | ADDED (extends E1, H3) | FAIL if silent | SPEC, CODE, IMG |
+| U2 | Neutral framing: titles and annotations describe what is plotted (outcome, units, comparison) and do not persuade. No emphasis, highlight color or sort order that favors one group unless the spec's question says so. | 35,52,55 | ADDED (extends E7, E8) | WARN | IMG |
+| U3 | Equal treatment: the same scale, bins, smoothing, baseline and ordering rule for every group compared; any ordering rule is stated (design order, alphabetical or by value). | 5,28,49 | ADDED (extends H9, C3) | WARN | CODE, IMG |
+| U4 | Show uncertainty and contrary evidence: intervals or distributions, overlapping groups, null and opposite results. Nothing implies more certainty than the data have. | 29,33,36 | ADDED (extends E3, E4) | WARN | IMG |
+| U5 | State the limits: small n, design caveats and analysis warnings carried into the caption, with a one-line takeaway that the data support. Complicated data should read as clearly as it honestly can, not clearer. | 35,53,55 | ADDED (extends E7) | WARN | SPEC, IMG |
+
 ## Helper use
 - `lint_script(path_or_text)` -> findings (static, code-level; cannot see the image).
 - `audit_figure(fig)` -> findings on a live matplotlib figure before saving.
@@ -78,4 +88,4 @@ Both the generator and the reviewer read this file, so they cannot drift apart. 
 
 ## Open items for the student (not decided here)
 - Is a pie ever acceptable beyond being flat 2D (current rule: only a few parts of a stated whole)?
-- Confirm or change every rule tagged ADDED.
+- Confirm or change every rule tagged ADDED, including the new C6 and U1-U5.
