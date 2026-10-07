@@ -2,6 +2,8 @@
 
 See `SCRNA_WORKFLOW_SUMMARY.md` for the one-page overview.
 
+The shared rules (checkpoint order, restart files, stop on FAIL, plain-English cards, quality scale) live in `../data-analysis-workflow`; this folder adds what is specific to single-cell data. The master skill `skills/scrna-seq-workflow` loads the general rule first.
+
 Open `scrna_checkpoints.ipynb` from this folder (it expects `scrna_workflow/` next to it). Set the environment variable `NB_DATASET` to
 `baron` (GSE84133 donor 1, UMI counts, small), `kang` (GSE96583 batch 2, 10x PBMC, control vs interferon-beta, 8 donors) or `sade_feldman`
 (GSE120575, Smart-seq2 TPM, large). Run all cells, or change one parameter and rerun: finished stages whose inputs and parameters are unchanged load from
