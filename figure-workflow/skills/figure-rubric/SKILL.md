@@ -1,13 +1,13 @@
 ---
 name: figure-rubric
-description: "Shared, numbered rubric of figure rules from the rules, good and bad examples and guidelines supplied by the user (readability, not skewing results, readable color, appropriate chart style, unbiased presentation, context, simplicity, process), each with its source slide, PASS/WARN/FAIL severity and how it is checked. Load when generating a figure (via figure-generation) or reviewing one (figure-review agent). Ships helpers: lint_script, audit_figure, review_card, apply_figure_rules, categorical_colors, colormap_for, symmetric_limits, bubble_area, break_at_gaps, figure_spec_template."
+description: "Shared, numbered rubric of figure rules from the rules, good and bad examples and guidelines supplied by the user (readability, not skewing results, readable color, appropriate chart style, unbiased presentation, context, simplicity, process), each with its source slide, PASS/WARN/FAIL severity and how it is checked. Load when generating a figure (via figure-generation) or reviewing one (figure-review agent). Ships helpers: title_bottom, lint_script, audit_figure, review_card, apply_figure_rules, categorical_colors, colormap_for, symmetric_limits, bubble_area, break_at_gaps, figure_spec_template."
 ---
 
 # Figure rubric (single source of truth)
 
 Both the generator and the reviewer read this file, so they cannot drift apart. Principle behind every rule: **a figure is a contract**. Visual magnitude represents numerical magnitude, every visual dimension encodes something stated, and the reader can see n, uncertainty and context.
 
-**Origin tags:** `NOTES` = verdict from the student's own slide notes; `SLIDE` = stated on the slide itself; `ADDED` = added by the assistant from standard practice, not from class (student should accept or change). Severity: FAIL blocks the figure, WARN must be fixed or justified in the spec, N/A when not applicable.
+**Origin tags:** `USER` = rule stated directly by the user in conversation; `NOTES` = verdict from the student's own slide notes; `SLIDE` = stated on the slide itself; `ADDED` = added by the assistant from standard practice, not from class (student should accept or change). Severity: FAIL blocks the figure, WARN must be fixed or justified in the spec, N/A when not applicable.
 **Check:** CODE = `lint_script`/`audit_figure`; IMG = look at the rendered image; SPEC = compare to the figure spec; DATA = needs the data summary.
 
 ## A. Do not distort magnitude
@@ -61,7 +61,7 @@ Both the generator and the reviewer read this file, so they cannot drift apart. 
 | ID | Rule | Slide | Origin | Sev | Check |
 |---|---|---|---|---|---|
 | S1 | One question per figure. If lines cannot be followed or the legend needs effort, simplify: bin, color, or split into several figures or small multiples. Exploration may be dense; explanation shows one comparison at a time. Heuristic: more than about 6 colored series is too many. | 24,26,53 | NOTES + SLIDE (limit 6: ADDED) | FAIL if unreadable | IMG, CODE |
-| S2 | Readable at final size: tick text at least 8 pt, labeled axes with units, no overlapping text, upright 2D layout. | 9 | NOTES (8 pt: ADDED) | WARN | CODE, IMG |
+| S2 | Readable at final size: labeled axes with units, no overlapping text, upright 2D layout (font sizes, titles and legends are rules T1-T4). | 9 | NOTES (8 pt: ADDED) | WARN | CODE, IMG |
 | S3 | Consistent order, labels and layout across aligned panels. Layout changes must preserve the evidence. | 54 | SLIDE | WARN | IMG |
 
 ## F. Process and reproducibility
@@ -70,6 +70,15 @@ Both the generator and the reviewer read this file, so they cannot drift apart. 
 | P1 | Order: inspect data (units, ranges, missingness, composition) -> explore broadly -> state ONE question -> refine (labels, common scales, uncertainty, context). Write the figure spec before plotting. | 47 | SLIDE | WARN | SPEC |
 | P2 | Figure reads saved results, not in-memory variables; saved as vector (svg/pdf) plus png with the script. | - | ADDED (week-1 convention) | WARN | CODE |
 | P3 | Fixed random seeds; data path recorded in the spec. | - | ADDED | WARN | CODE |
+
+## T. Typography and legends (stated by the user)
+Size ladder at the default base of 10 pt: title 13 bold > axis labels 11 regular > tick labels 10 = legend text 10. Nothing below 8 pt at final size.
+| ID | Rule | Slide | Origin | Sev | Check |
+|---|---|---|---|---|---|
+| T1 | Every piece of text (title, axis labels, ticks, legend, annotations, panel letters) is at least 8 pt at final size and readable without zooming. | - | USER (8 pt floor: ADDED) | FAIL | CODE, IMG |
+| T2 | One clear title, placed at the TOP (default) or BOTTOM (caption-style, `title_bottom`), never inside the data area and never overlapping; in bold and larger than the axis labels. Panel titles are bold and at least axis-label size. | - | USER | FAIL if missing, overlapping or smaller than axis labels; WARN if not bold | CODE, IMG |
+| T3 | Axis labels are larger than tick labels and regular weight, so the title stands out, and carry units. | - | USER | WARN | CODE, IMG |
+| T4 | Legends, when present, are legible (at least tick size and 8 pt), sit outside the axes or in empty space, do not cover data, list entries in the same order as the visual, and have at most 6 entries (otherwise label directly). | - | USER (6 entries: ADDED) | FAIL if text < 8 pt; WARN if it covers data | CODE, IMG |
 
 ## G. Unbiased, clear presentation
 | ID | Rule | Slide | Origin | Sev | Check |
@@ -88,4 +97,4 @@ Both the generator and the reviewer read this file, so they cannot drift apart. 
 
 ## Open items for the student (not decided here)
 - Is a pie ever acceptable beyond being flat 2D (current rule: only a few parts of a stated whole)?
-- Confirm or change every rule tagged ADDED, including the new C6 and U1-U5.
+- Confirm or change every rule tagged ADDED, including C6, U1-U5 and the 8 pt floor and 6-entry legend limit in T1 and T4.

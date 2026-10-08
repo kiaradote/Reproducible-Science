@@ -13,13 +13,21 @@ def apply_figure_rules(font_size=10):
     import matplotlib as mpl
     from cycler import cycler
     mpl.rcParams.update({
-        "font.size": font_size, "axes.labelsize": font_size + 1, "axes.titlesize": font_size + 2,
+        "font.size": font_size, "axes.labelsize": font_size + 1, "axes.titlesize": font_size + 3,
+        "axes.titleweight": "bold", "axes.labelweight": "normal", "axes.titlepad": 8,
+        "figure.titlesize": font_size + 4, "figure.titleweight": "bold",
         "xtick.labelsize": font_size, "ytick.labelsize": font_size, "legend.fontsize": font_size,
+        "legend.title_fontsize": font_size,
         "axes.spines.top": False, "axes.spines.right": False, "legend.frameon": False,
         "figure.dpi": 100, "savefig.dpi": 300, "savefig.bbox": "tight",
         "axes.prop_cycle": cycler(color=list(SAFE_COLORS)),
     })
     return SAFE_COLORS
+
+
+def title_bottom(fig, text, font_size=13):
+    """Caption-style bold title placed at the BOTTOM of the figure (T2). Use instead of a top title, never both."""
+    fig.text(0.5, -0.02, text, ha="center", va="top", fontsize=font_size, fontweight="bold")
 
 
 def categorical_colors(n):
@@ -90,7 +98,8 @@ def figure_spec_template():
 """
 
 
-_LINT_RULES = (
+def lint_rules():
+    return (
     ("H2", "FAIL", r"projection\s*=\s*['\"]3d['\"]|Axes3D|plot_surface|bar3d|plot_wireframe|plot3D|scatter3D", "3D plot: avoid 3D entirely"),
     ("H1", "FAIL", r"\.pie\([^)]*(explode|shadow)", "Pie with explode/shadow: pies must be flat 2D"),
     ("H3", "FAIL", r"\.bar[h]?\([\s\S]*?\)[\s\S]{0,400}?set_[yx]lim\(\s*[1-9]|set_[yx]lim\(\s*[1-9][\s\S]{0,400}?\.bar[h]?\(", "Bars with nonzero axis start: bar length must start at zero"),
@@ -122,7 +131,7 @@ def lint_script(src):
         line = code[:m.start()].count("\n") + 1 if m is not None else None
         out.append({"rule": rule, "severity": sev, "message": msg, "line": line})
 
-    for rule, sev, pat, msg in _LINT_RULES:
+    for rule, sev, pat, msg in lint_rules():
         if pat:
             for m in re.finditer(pat, code, flags=re.I if rule == "K2" else 0):
                 add(rule, sev, msg, m)
@@ -141,6 +150,14 @@ def lint_script(src):
         add("P2", "WARN", "Output not saved as both a vector file (svg/pdf) and a png")
     if re.search(r"\.bar[h]?\(|barplot\(", code) and not re.search(r"scatter\(|stripplot|swarmplot|violin|boxplot|\.plot\(.*marker|jitter", code):
         add("E4", "WARN", "Bars or means plotted without raw observations in the script")
+    for m in re.finditer(r"(?<![A-Za-z_])(fontsize|labelsize|titlesize|font_size)\s*=\s*([0-7](?:\.\d+)?)\b", code):
+        if float(m.group(2)) < 8:
+            add("T1", "FAIL", "Font size %s pt is below the 8 pt floor" % m.group(2), m)
+            break
+    if plots and not re.search(r"set_title\(|suptitle\(|title_bottom\(|\.title\(|fig\.text\(", code):
+        add("T2", "WARN", "No title found (top or bottom, bold, larger than the axis labels); the caption must then carry the claim")
+    if re.search(r"set_title\([^)]*fontweight\s*=\s*['\"](normal|light)", code):
+        add("T2", "WARN", "Title is not bold")
     seen, res = set(), []
     for f in out:
         k = (f["rule"], f["message"])
@@ -181,6 +198,53 @@ def audit_figure(fig, min_font=8.0, max_legend=6):
                         out.append({"rule": "K3", "severity": "FAIL", "message": "Rainbow-type colormap '%s'" % im.get_cmap().name})
                 except Exception:
                     pass
+
+    fig.canvas.draw()
+    rend = fig.canvas.get_renderer()
+    for ax in axes:
+        if not ax.get_visible():
+            continue
+        t = ax.title
+        lab = [x for x in (ax.xaxis.label, ax.yaxis.label) if x.get_text()]
+        if t.get_text() and lab:
+            ls = max(x.get_fontsize() for x in lab)
+            if t.get_fontsize() <= ls:
+                out.append({"rule": "T2", "severity": "FAIL", "message": "Title (%.1f pt) is not larger than the axis labels (%.1f pt)" % (t.get_fontsize(), ls)})
+            if t.get_fontweight() not in ("bold", "heavy", "semibold", 600, 700, 800, 900):
+                out.append({"rule": "T2", "severity": "WARN", "message": "Title is not bold"})
+        if t.get_text() and t.get_fontsize() < min_font:
+            out.append({"rule": "T1", "severity": "FAIL", "message": "Title font below %.0f pt" % min_font})
+        for x in lab:
+            if x.get_fontsize() < min_font:
+                out.append({"rule": "T1", "severity": "FAIL", "message": "Axis label font %.1f pt is below %.0f pt" % (x.get_fontsize(), min_font)})
+                break
+        tl = [x.get_fontsize() for x in ax.get_xticklabels() + ax.get_yticklabels() if x.get_text()]
+        if tl and lab and max(x.get_fontsize() for x in lab) < max(tl):
+            out.append({"rule": "T3", "severity": "WARN", "message": "Axis labels are smaller than tick labels"})
+        leg = ax.get_legend()
+        if leg is not None:
+            fs = [x.get_fontsize() for x in leg.get_texts()]
+            if fs and min(fs) < min_font:
+                out.append({"rule": "T4", "severity": "FAIL", "message": "Legend text %.1f pt is below %.0f pt" % (min(fs), min_font)})
+            bb = leg.get_window_extent(rend)
+            hit = False
+            for ln in ax.lines:
+                pts = ax.transData.transform(np.column_stack([ln.get_xdata(orig=False), ln.get_ydata(orig=False)]).astype(float)) if len(ln.get_xdata()) and not isinstance(ln.get_xdata()[0], str) else []
+                if len(pts) and ((pts[:, 0] > bb.x0) & (pts[:, 0] < bb.x1) & (pts[:, 1] > bb.y0) & (pts[:, 1] < bb.y1)).any():
+                    hit = True
+            for c in ax.collections:
+                try:
+                    off = np.asarray(c.get_offsets(), dtype=float)
+                    pts = c.get_offset_transform().transform(off)
+                    if len(pts) and ((pts[:, 0] > bb.x0) & (pts[:, 0] < bb.x1) & (pts[:, 1] > bb.y0) & (pts[:, 1] < bb.y1)).any():
+                        hit = True
+                except Exception:
+                    pass
+            if hit:
+                out.append({"rule": "T4", "severity": "WARN", "message": "Legend covers plotted data: move it outside the axes or to an empty area"})
+    for tx in fig.texts:
+        if tx.get_text() and tx.get_fontsize() < min_font:
+            out.append({"rule": "T1", "severity": "FAIL", "message": "Figure text below %.0f pt" % min_font})
     if len(axes) > 1:
         xl = {tuple(np.round(a.get_xlim(), 6)) for a in axes if a.has_data()}
         yl = {tuple(np.round(a.get_ylim(), 6)) for a in axes if a.has_data()}
