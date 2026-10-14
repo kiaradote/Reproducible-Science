@@ -7,6 +7,7 @@ Reusable, tested workflows for reproducible analysis. Every workflow runs as ord
 | `data-analysis-workflow/` | The general rules and skills for any quantitative dataset: intake, QC, normalization, structure, group comparison, biological meaning, robustness. Start here for proteomics, CRISPR screens, bulk omics or assays. |
 | `scrna-workflow/` | The single-cell RNA-seq workflow: a restartable notebook, engine, tests and eight single-cell skills. It reuses the general rules. |
 | `figure-workflow/` | Rules and agents for making and reviewing figures: a shared rubric, a generation workflow, a figure-maker agent and a read-only figure-reviewer agent. Use it after the analysis checkpoints. |
+| `statistical-review-workflow/` | Skills and the `STAT_REVIEWER` agent for verifying a paper's statistical claims against its public data: a six-part claim ledger, a data-retrieval and reproducibility gate, independent recalculation, a methodology audit, a bias, missingness and conclusion-alignment screen, and an adversarial review. A concern is never called an error unless it was demonstrated. Includes a worked example. |
 
 The skills in both folders are also published to Claude as skills, so a new conversation can load them by name (`data-analysis-workflow`, `scrna-seq-workflow`, ...). The folder copies and the published skills are kept in step by hand.
 
