@@ -1,0 +1,3 @@
+sample,n_wt_infected,n_analysed,med_frac_viral_all,med_frac_viral_analysed,pct_8genes_all,pct_all_viral_genes_analysed,pct_cells_top10pct_transcription_in_analysed
+lowMOI,254,91,0.03954153503180555,0.0605064835402687,57.08661417322835,73.62637362637363,13.186813186813188
+highMOI,357,290,0.2265014363016901,0.25154110093187904,70.86834733893558,84.48275862068965,10.0
